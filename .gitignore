@@ -1,0 +1,25 @@
+# Ignorar archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Ignorar configuraciones locales del entorno
+.vscode/
+.env
+
+# Ignorar archivos generados por Sphinx
+_build/
+*.log
+
+# Ignorar bases de datos locales
+*.sqlite
+*.db
+
+# Ignorar otros archivos temporales o de respaldo
+*.tmp
+*.bak
+*.swp
+
+# Ignorar documentación generada automáticamente
+*.html
+*.pdf
+*.docx
