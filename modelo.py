@@ -4,169 +4,78 @@ from functools import reduce
 import operator
 import re
 
-db = SqliteDatabase("video_base_orm.db") 
-"""
-Conexión a la base de datos SQLite.
+db = SqliteDatabase("video_base_orm.db") #indica con que base de datos vamos a trabajar. Se instancia un objeto de la clase
+#SqliteDatabase que me permitirá acceder a la conexion con la bd. 
 
-Esta conexión se utiliza para interactuar con la base de datos `video_base_orm.db`.
-Se crea una instancia de `SqliteDatabase` que gestiona la conexión.
-"""
 class BaseModel(Model):
-    """
-    Clase base para modelos ORM con Peewee.
-
-    Todos los modelos de datos heredarán de esta clase para interactuar con la base de datos.
-    """
     class Meta:
         database = db
 
 
-class Tabla(BaseModel): 
-    """
-    Modelo que representa la tabla principal en la base de datos.
-
-    Cada instancia de esta clase corresponde a un registro en la tabla `Tabla`.
-
-    Atributos:
-        titulo (CharField):
-            Título único de la película.
-        genero (CharField):
-            Género de la película.
-        estado (CharField):
-            Estado actual de la película (e.g., Disponible, Alquilada).
-        socio (CharField):
-            Nombre o identificación del socio asociado.
-        numero (CharField):
-            Número único asociado al alquiler.
-        devolucion (CharField):
-            Fecha de devolución esperada.
-    """
-    titulo = CharField(unique=True) 
+class Tabla(BaseModel): #Clase que va a ser mapeada por el ORM
+    titulo = CharField(unique=True) #cada atributo corresponde a una columna en la BD
     genero = CharField()
     estado = CharField()
     socio = CharField()
     numero = CharField()
     devolucion = CharField()
+db.connect() #conerctamos con la bd
+db.create_tables([Tabla]) #creamos la tabla
 
-db.connect() 
-"""
-Establece la conexión con la base de datos.
-"""
-db.create_tables([Tabla]) 
-"""
-Crea la tabla `Tabla` en la base de datos, si no existe.
-"""
+## MODELO ##
 
-
+##  
 class BaseDeDatos:
-    """
-    Clase que gestiona las operaciones ABMC (Alta, Baja, Modificación, Consulta) en la base de datos.
-
-    Métodos:
-        alta_pelicula: 
-            Registra una nueva película en la base de datos.
-        elimina_pelicula_de_bd:
-            Elimina una película de la base de datos.
-        consulta_base_datos:
-            Consulta todos los registros en la base de datos.
-        verifica_catalogo_en_bd:
-            Verifica si una película existe en el catálogo.
-        alquilar_pelicula:
-            Marca una película como alquilada en la base de datos.
-        devolver_pelicula:
-            Marca una película como devuelta en la base de datos.
-        buscar_en_bd:
-            Realiza búsquedas en la base de datos con filtros opcionales.
-    """
     def __init__(self):
-        """Inicializa una instancia de la clase BaseDeDatos."""
         pass
 
         
+## funcion Alta Pelicula ingresa una película a la base de datos. 
     def alta_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Registra una nueva película en la base de datos.
-
-        Args:
-            titulo (str): Título de la película.
-            genero (str): Género de la película.
-            estado (str): Estado inicial de la película (e.g., "Disponible").
-            socio (str): Socio asociado al alquiler.
-            numero (str): Número único asociado al alquiler.
-            devolucion (str): Fecha de devolución esperada.
-        """
-        alta_bd = Tabla() 
+        alta_bd = Tabla() #intancio un objeto de la clase Tabla y declaro sus atributos. 
         alta_bd.titulo = titulo
         alta_bd.genero = genero
         alta_bd.estado = "Disponible"
         alta_bd.socio = socio
         alta_bd.numero = numero
         alta_bd.devolucion = devolucion
-        alta_bd.save()       
+        alta_bd.save() #graba ->  "commit" en SQL       
 
-
+# ## funcion Baja Pelicula de la base de datos.
     def elimina_pelicula_de_bd(self, titulo):
-        """
-        Elimina una película de la base de datos por su título.
-
-        Args:
-            titulo (str): Título de la película a eliminar.
-
-        Returns:
-            None: Si no se encuentra la película en la base de datos.
-        """
         try:
-            borrar_base = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower()) 
+            borrar_base = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower()) #fn.LOWER -> LOWER(titulo) en SQL
             borrar_base.delete_instance()
 
         except Tabla.DoesNotExist:
-            return None 
+            return None  # Opcionalmente, devuelve None para indicar que no se encontró
 
+## funcion consulta la base de datos y retorna info para actualizar vista
     def consulta_base_datos(self):
-        """
-        Consulta todos los registros de la base de datos.
-
-        Returns:
-            list: Lista de registros en la tabla `Tabla`.
-        """
         rows = Tabla.select()
         return rows
 
+# ## funcion verifica si la pelicula existe en la base de datos
     def verifica_catalogo_en_bd(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Verifica si una película existe en la base de datos.
-
-        Args:
-            titulo (str): Título de la película.
-            genero (str): Género de la película.
-            estado (str): Estado actual de la película.
-            socio (str): Socio asociado al alquiler.
-            numero (str): Número único asociado al alquiler.
-            devolucion (str): Fecha de devolución esperada.
-
-        Returns:
-            Tabla: Objeto que representa la película si existe.
-            None: Si no se encuentra la película.
-        """
         try:
             verifica_base_resultado = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower())
             return verifica_base_resultado
         
         except Tabla.DoesNotExist:
             return None
+###NOTAS: 
+    # LA FUNCION: debe invocar a la función de la vista para mostrar el mensaje al usuario
+    ## PROBLEMAS: AttributeError: 'BaseDeDatos' object has no attribute 'mostrar_mensaje_no_encontrado'
+    ## VERIFICACIÓN DE DECLARACION:
+    # La funcion mostrar_mensaje_no_encontrado(titulo) se encuentra en modulo Vista linea 336 (OK)
+    # SOLUCION:
+    # se agregó un return None para informar al controlador que "la pelicula no existe"
+    # se quitó la linea self.mostrar_mensaje_no_encontrado(titulo) del modelo.
+    # se delegó al controlador invocar a la funcion "mostrar_mensaje_no_encontrado"
 
+# ## funcion modifica registro alquiler en la base de datos
     def alquilar_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Actualiza el estado de una película como alquilada.
-
-        Args:
-            titulo (str): Título de la película.
-            genero (str): Género de la película.
-            estado (str): Estado a actualizar ("Alquilada").
-            socio (str): Socio que alquiló la película.
-            numero (str): Número único asociado al alquiler.
-            devolucion (str): Fecha de devolución esperada.
-        """
+        
         actualizar_bd = Tabla.update(
             titulo = titulo,
             genero = genero,
@@ -177,18 +86,9 @@ class BaseDeDatos:
         ).where(fn.LOWER(Tabla.titulo) == titulo.lower())
         actualizar_bd.execute()
 
+# ## funcion modifica registro devolucion en bd y actualiza la vista
     def devolver_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Marca una película como devuelta en la base de datos.
 
-        Args:
-            titulo (str): Título de la película.
-            genero (str): Género de la película.
-            estado (str): Nuevo estado ("Disponible").
-            socio (str): Socio asociado (se limpia al devolver).
-            numero (str): Número único asociado (se limpia al devolver).
-            devolucion (str): Fecha de devolución (se limpia al devolver).
-        """
         devolucion_bd = Tabla.update(
             titulo = titulo,
             genero = genero,
@@ -199,24 +99,14 @@ class BaseDeDatos:
 
         devolucion_bd.execute()
         
+# ## funcion busca en la base de datos
     def buscar_en_bd(self, titulo = None, genero = None, estado = None, socio = None):# se asigna el valor "None" por defecto a los argumentos en donde no se proporciona algún valor. 
-        """
-        Realiza búsquedas en la base de datos con filtros opcionales.
-
-        Args:
-            titulo (str, optional): Título parcial o completo.
-            genero (str, optional): Género de la película.
-            estado (str, optional): Estado de la película.
-            socio (str, optional): Socio asociado al alquiler.
-
-        Returns:
-            list: Lista de resultados que cumplen las condiciones.
-            list: Lista vacía si no se especifican filtros.
-        """
         
-        condiciones = [] #se crea un lista de condiciones
-        
-        if titulo:#evalúa si cada parámetro tiene un valor y lo agrega a la lista
+        #se crea un lista de condiciones
+        condiciones = []
+        #evalúa si cada parámetro tiene un valor y lo agrega a la lista
+        if titulo:
+            #REFACTORING: Busqueda por palabra clave. En la busqueda no es necesario ingresar el titulo completo, tal como fue cargado al darse de alta.
             condiciones.append(fn.LOWER(Tabla.titulo).contains(titulo.lower()))
         if genero:
             condiciones.append(fn.LOWER(Tabla.genero) == genero.lower())
@@ -228,7 +118,10 @@ class BaseDeDatos:
         if not condiciones:
             return[] # si no hay coniciones devuelve una lista vacia. 
 
+        # Realiza la consulta usando "AND" entre todos los elemntos de "condiciones"
+        
         consulta_bd = Tabla.select().where(reduce(operator.and_, condiciones)) 
+        # devuelve una lista con los resultados
         resultado = list(consulta_bd)
         return resultado
         

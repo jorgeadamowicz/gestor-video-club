@@ -1,11 +1,3 @@
-"""
-Módulo Vista para la aplicación de Video Club.
-
-Este módulo implementa la vista en el patrón de diseño MVC. Es responsable de gestionar 
-la interfaz de usuario utilizando Tkinter y de interactuar con el controlador para realizar 
-operaciones como alquiler, devolución y gestión de películas.
-"""
-
 from tkinter import StringVar, LabelFrame, ttk
 from tkinter import Label, Entry, Button, Menu
 from tkinter import CENTER, W, NSEW
@@ -14,46 +6,28 @@ from tkcalendar import Calendar
 from validaciones import validar_campo_socio, validar_campos_alquiler, CampoInvalidoError
 from estilos import Temas
 
+## VISTA ##
 
 class VistaVideoClub:
-    """
-    Clase VistaVideoClub.
-
-    Esta clase gestiona la interfaz gráfica del usuario (GUI) para la aplicación de Video Club. 
-    Utiliza la librería Tkinter para construir la ventana principal, los widgets y manejar las interacciones del usuario.
-
-    Atributos:
-        ventana: Instancia de Tk que representa la ventana principal.
-        controlador: Instancia del controlador para interactuar con la lógica de negocio.
-    """
     def __init__(self, ventana, application) -> None:
-        """
-        Inicializa la ventana principal y los elementos de la interfaz gráfica y configura sus parámetros básicos.
-        - Establece el título y las dimensiones de la ventana.
-        - Carga el ícono de la aplicación.
-        - Aplica el tema predeterminado.
-        - Inicializa las variables de datos y crea los widgets de la interfaz.
-
-        Args:
-            ventana: La instancia de la ventana principal (Tk).
-            application: Instancia del controlador que conecta la vista con el modelo.
-        """
         
         self.ventana = ventana
         self.controlador = application
+        
         self.ventana.title("Videoclub")
         self.ventana.geometry("1000x650")
         self.ventana.iconbitmap("icono.ico") 
-        self.aplicar_temas(Temas.tema_clasico)# Aplica un tema por defecto.
+        #self.ventana.configure(bg= "AntiqueWhite1") ##CONFIGURACION ORIGINAL OK
+
+        # Aplica un tema por defecto al iniciar, reemplaza a configuración original
+        self.aplicar_temas(Temas.tema_clasico) 
         self.inicializar_datos()
         self.crear_widgets()
+        
         self.actualizar_el_treeview()
    
+    ## declaración e inicialización de atributos "variables Tk"
     def inicializar_datos(self):
-        """
-        Inicializa las variables StringVar que se utilizan como modelo para los campos de entrada de la interfaz.
-        - Estas variables permiten enlazar datos de la interfaz con la lógica del programa.
-        """
         self.var_titulo = StringVar() #nombre
         self.var_genero = StringVar() #genero
         self.var_estado = StringVar() #estado
@@ -62,9 +36,7 @@ class VistaVideoClub:
         self.var_devolucion = StringVar() #fecha con tkcalendar
     
     def crear_widgets(self): 
-        """
-        Crea y configura todos los widgets de la interfaz gráfica, incluyendo los LabelFrames, Labels, Entrys y Botones.
-        """
+    ## LabelFrame datapicker 
         self.lf_datapicker = LabelFrame(self.ventana, text ="Fecha Devolución", padx = 10, pady = 10)
         print("lf_datapicker creado")  # Verificar que esta línea se ejecuta (PRUEBA)
         self.lf_datapicker.grid(row=0, column=2, padx=20, pady=20)
@@ -131,18 +103,17 @@ class VistaVideoClub:
 
     ## funcion aplica los temas personalizados 
     def aplicar_temas(self, tema):
-        """
-        Aplica un tema personalizado a los elementos de la interfaz gráfica.
-
-        Args:
-            tema (dict): Un diccionario que contiene las configuraciones de color y estilo.
-        """
+       
+        print(f"aplicando temas{tema}")
+       
+        #self.ventana.configure(bg = tema['fondo']) #cambia el fondo de la ventana (ok)
         if hasattr(self, 'lf_datapicker'): #Prueba usando funcion hasattr
             self.lf_datapicker.configure(bg=tema['fondo_datapicker'])
             self.ventana.configure(bg = tema['fondo'])
             self.lf_busqueda.configure(bg = tema['fondo_busqueda'])
             self.lf_gestion_peliculas.configure(bg = tema['fondo_gestion'])
             self.lf_treeview.configure(bg = tema["fondo_treeview"])
+            ## aqui se podría crear un lista "botones" y recorrerla para asignar el mismo tema. lo mismo para los "label"
             self.boton_buscar.configure(bg = tema["boton"])
             self.boton_nueva_busqueda.configure(bg = tema["boton"])
             self.boton_alquilar.configure(bg = tema["boton"])
@@ -162,7 +133,32 @@ class VistaVideoClub:
             
         else:
             print("lf_datapicker no está definido")
+
+        #self.lf_datapicker.configure(bg = tema['fondo_datapicker'])
+        # self.lf_busqueda.configure(bg = tema['fondo_busqueda'])
+        # self.lf_gestion_peliculas.configure(bg = tema['fondo_gestion'])
+        # self.lf_treeview.configure(bg = tema["fondo_treeview"])
         
+        # self.boton_buscar.configure(bg = tema["boton"])
+        # self.boton_nueva_busqueda.configure(bg = tema["boton"])
+        # self.boton_alquilar.configure(bg = tema["boton"])
+        # self.boton_devolucion.configure(bg = tema["boton"])
+        # self.boton_alta_pelicula.configure(bg = tema["boton"])
+        # self.boton_baja_pelicula.configure(bg = tema["boton"])
+
+    ###NOTAS:   
+    # PROBLEMA: self.ventana.configure(bg = tema['fondo']) #cambia el fondo de la ventana funciona (ok), pero cuando activo otro de los atributos me da: AttributeError: (eje)'VistaVideoClub' object has no attribute 'lf_datapicker'
+    ## COMPROBACIONES:
+    # * lf_datapicker (eje), está definido en la linea 40 dentro del metodo crear_widgets()
+    # * flujo: crear_widgets() es invocado mucho antes que aplicar_temas()
+    # * los estilos se probaron y funcionan al ser llamados desde self.ventana.configure(bg = tema['ATRIBUTO'])
+    # * al comprobar la linea: self.lf_datapicker.configure(bg=tema['fondo_datapicker']) utilizando "if hasattr" funciona correctamente.
+    ## SOLUCION: (PROVISORIA)
+    # * como funcionó el punto anterior fui agregando y probando los otros atributos y al menos quedaron funcionando aunque no es lo que prentendía.
+    # * CONSULTA: 1) es probable que al utilizar la funcion ".configure", en mas de un linea, pueda tener un conflicto en tkinter. 
+    # 2) como podría optimizar mi metodo aplicar_temas si bien quedó funcionando tuve que repertir muchas lineas para asignar los valores a cada elemento de la vista. 
+     
+                
         
     ## menu de inicio
         menubar = Menu(self.ventana)
@@ -183,10 +179,6 @@ class VistaVideoClub:
 
     ## Vista ## Treeview ## 
     def configuracion_treeview(self):
-        """
-        Configura el Treeview para mostrar los resultados de las búsquedas y el catálogo.
-        Incluye un scrollbar para navegación.
-        """
         self.lf_treeview = LabelFrame(self.ventana, text="Resultados", padx = 20, pady = 20)
         self.lf_treeview.grid(row = 1, column = 0, columnspan = 3, padx = 20, pady = 20, sticky = "nsew")
 
@@ -218,37 +210,19 @@ class VistaVideoClub:
     # evento vinculado a la vista utilizando el método bind. 
         self.tree.bind("<Double-1>", self.carga_datos_desde_tree)
 
+    ## funcion datapicker ##
     def obtener_fecha(self):
-        """
-        Obtiene la fecha seleccionada en el widget Calendar y la asigna al campo correspondiente.
-        """
         fecha_seleccionada = self.calendario.get_date()
         self.var_devolucion.set(fecha_seleccionada)       
             
+    ## funcion verifica si la pelicula esta en catalogo 
     def verificar_y_alquilar(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Verifica si una película está disponible para alquiler y, de ser así, la alquila.
-
-        Args:
-            titulo (str): Título de la película.
-            genero (str): Género de la película.
-            estado (str): Estado de la película (e.g., "Disponible").
-            socio (str): Nombre del socio.
-            numero (str): Número de socio.
-            devolucion (str): Fecha de devolución.
-        """
         resultado = self.controlador.gestiona_verifica_catalogo(titulo, genero, estado, socio, numero, devolucion)
         self.gestionar_resultado_existe_catalogo(resultado, titulo, genero, estado, socio, numero, devolucion)
 
     ## funcion maneja el resultado de la verificación de existencia de una película en la base de datos.
     def gestionar_resultado_existe_catalogo(self, resultado, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Maneja el resultado de la verificación de existencia de una película en el catálogo.
 
-        Args:
-            resultado: Resultado obtenido del controlador.
-            titulo, genero, estado, socio, numero, devolucion: Datos de la película.
-        """
         if resultado:
             estado_disponibilidad = resultado.estado
             if estado_disponibilidad == "Disponible":
@@ -260,14 +234,9 @@ class VistaVideoClub:
         else: 
             showinfo("INFO", "La película no se encuentra en catálogo!")
 
-
+    ## funcion alquila pelicula.
     def alquila_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Realiza el alquiler de una película si todos los campos son válidos.
-
-        Args:
-            titulo, genero, estado, socio, numero, devolucion: Datos de la película.
-        """
+    
         # comprobacion de campos y manejo de error. llama al metodo validar_campos_alquiler desde el modulo validaciones
         try:
             # Validar los campos antes de enviarlos al controlador
@@ -283,12 +252,7 @@ class VistaVideoClub:
 
     ## funcion devuelve pelicula.
     def devuelve_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
-        """
-        Procesa la devolución de una película alquilada.
 
-        Args:
-            titulo, genero, estado, socio, numero, devolucion: Datos de la película.
-        """
         self.controlador.gestiona_devolver_pelicula(titulo, genero, estado, socio, numero, devolucion)
         showinfo("INFO", "Devolución exitosa")
         self.limpiar_campos()
@@ -296,9 +260,7 @@ class VistaVideoClub:
 
     ## funcion getter recupera valores de campos entry y realiza el alta.
     def recuperar_enviar_valores(self): 
-        """
-        Recupera los valores de los campos de entrada y los envía al controlador para realizar el alta de una película.
-        """
+
         el_titulo = self.var_titulo.get()
         el_genero = self.var_genero.get()
         el_estado = self.var_estado.get()
@@ -313,12 +275,6 @@ class VistaVideoClub:
 
     ## funcion Baja Pelicula borra registro.
     def baja_pelicula(self, titulo):
-        """
-        Solicita la eliminación de una película del catálogo, previa confirmación del usuario.
-
-        Args:
-            titulo (str): Título de la película a eliminar.
-        """
         
         respuesta = askquestion("Confimación", "Está seguro que quiere borrar la película del catálogo?")
         if respuesta == "yes":
@@ -330,14 +286,9 @@ class VistaVideoClub:
             showinfo("INFO", "Operación cancelada!" )
             self.limpiar_campos()
 
-    
+    ## funcion buscar
     def buscar(self, titulo, genero, estado, socio):
-        """
-        Busca películas en el catálogo según los criterios ingresados y muestra los resultados en el Treeview.
 
-        Args:
-            titulo, genero, estado, socio: Criterios de búsqueda.
-        """
         rows = self.controlador.gestiona_busqueda(titulo, genero, estado, socio)
         if not rows: #verifica si la lista está vacia. 
             showinfo("INFO", "La película no se encuentra en catálogo!")
