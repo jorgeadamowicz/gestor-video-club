@@ -11,7 +11,8 @@ from tkinter import Label, Entry, Button, Menu
 from tkinter import CENTER, W, NSEW
 from tkinter.messagebox import askquestion, showerror, showinfo, showwarning
 from tkcalendar import Calendar
-from validaciones import validar_campo_socio, validar_campos_alquiler, CampoInvalidoError
+#from validaciones import validar_campo_socio, validar_campos_alquiler, CampoInvalidoError
+from validaciones import validar_socio, validar_alquiler, CampoInvalidoError  #modificacion validación con decoradores
 from estilos import Temas
 
 
@@ -170,7 +171,7 @@ class VistaVideoClub:
         menu_archivo = Menu(menubar, tearoff = 0)
         menu_archivo.add_command(label = "Mostrar base", command = lambda: self.actualizar_el_treeview())
         menu_archivo.add_separator()
-        menu_archivo.add_command(label = "Salir", command = lambda: self.salir_app())#invoca a funcion salir.
+        menu_archivo.add_command(label = "Salir", command = lambda: self.salir_app())
         menu_archivo.add_separator()
         menu_archivo.add_command(label="Tema Clasico", command=lambda: self.aplicar_temas(Temas.tema_clasico))
         menu_archivo.add_command(label="Tema Claro", command=lambda: self.aplicar_temas(Temas.tema_claro))
@@ -244,41 +245,72 @@ class VistaVideoClub:
     def gestionar_resultado_existe_catalogo(self, resultado, titulo, genero, estado, socio, numero, devolucion):
         """
         Maneja el resultado de la verificación de existencia de una película en el catálogo.
+        
+        Esta función gestiona el flujo según el resultado de la verificación del catálogo. Si la película 
+        existe y está disponible, intenta proceder con el alquiler llamando a la función decorada 
+        `alquila_pelicula`. En caso de errores de validación, captura la excepción `CampoInvalidoError` 
+        y notifica al usuario. También informa al usuario si la película no está disponible o no se encuentra 
+        en el catálogo.
 
         Args:
-            resultado: Resultado obtenido del controlador.
-            titulo, genero, estado, socio, numero, devolucion: Datos de la película.
+            resultado (bool): Indica si la película existe en el catálogo.
+            titulo (str): Título de la película.
+            genero (str): Género de la película.
+            estado (str): Estado de la película (ej. "Disponible" o "No disponible").
+            socio (str): Nombre del socio que realiza el alquiler.
+            numero (int): Número de identificación del socio.
+            devolucion (str): Fecha de devolución de la película.
+
+            
+        Raises:
+            CampoInvalidoError: Si ocurre un error en las validaciones necesarias para el alquiler.
         """
         if resultado:
             estado_disponibilidad = resultado.estado
             if estado_disponibilidad == "Disponible":
-                self.alquila_pelicula(titulo, genero, estado, socio, numero, devolucion)
-                self.limpiar_campos()
+                try:
+                    # Llamada a la función decorada y validaciones
+                    self.alquila_pelicula(titulo, genero, estado, socio, numero, devolucion)
+                    self.limpiar_campos()
+                except CampoInvalidoError as e:                    
+                    # Muestra un mensaje de error si alguna validación falla
+                    showerror("Error de Validación", str(e))                        
             else:
                 showwarning("Atencion", "Película No disponible en este momento!")
                 self.limpiar_campos()
         else: 
             showinfo("INFO", "La película no se encuentra en catálogo!")
-
+            
+    #decorador para validaciones
+    @validar_socio
+    @validar_alquiler
 
     def alquila_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
         """
         Realiza el alquiler de una película si todos los campos son válidos.
+        Esta función realiza las validaciones necesarias en los campos "socio", "número de socio" 
+        y "devolución" mediante los decoradores `@validar_socio` y `@validar_alquiler`. Si ambas 
+        validaciones son exitosas, se procede con el registro del alquiler, mostrando un mensaje 
+        de confirmación. En caso de error, se muestra el mensaje correspondiente.
 
         Args:
-            titulo, genero, estado, socio, numero, devolucion: Datos de la película.
-        """
-        # comprobacion de campos y manejo de error. llama al metodo validar_campos_alquiler desde el modulo validaciones
-        try:
-            # Validar los campos antes de enviarlos al controlador
-            validar_campo_socio(socio)
-            validar_campos_alquiler(numero, devolucion)
+            titulo (str): Título de la película.
+            genero (str): Género de la película.
+            estado (str): Estado de la película (ej. disponible o alquilada).
+            socio (str): Nombre del socio.
+            numero (int): Número de identificación del socio.
+            devolucion (str): Fecha de devolución de la película.
        
+        Raises:
+            CampoInvalidoError: Si alguno de los campos no pasa las validaciones necesarias.
+        """
+        try:
             self.controlador.gestiona_alquilar_pelicula(titulo, genero, estado, socio, numero, devolucion)
             showinfo("INFO", "Pelicula Alquilada con exito.")
-            self.actualizar_el_treeview() 
-        #muestra el mensaje de error según corresponda. 
-        except CampoInvalidoError as e:
+            self.actualizar_el_treeview()
+        
+        except CampoInvalidoError as e: 
+            #muestra el mensaje de error según corresponda.
             showerror("ERROR", e.mensaje)
 
     ## funcion devuelve pelicula.
