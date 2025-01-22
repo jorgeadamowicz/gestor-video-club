@@ -78,9 +78,9 @@ class BaseDeDatos:
         buscar_en_bd:
             Realiza búsquedas en la base de datos con filtros opcionales.
     """
-    def __init__(self):
+    def __init__(self, inventario):
         """Inicializa una instancia de la clase BaseDeDatos."""
-        pass
+        self.inventario = inventario
 
         
     def alta_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
@@ -102,7 +102,9 @@ class BaseDeDatos:
         alta_bd.socio = socio
         alta_bd.numero = numero
         alta_bd.devolucion = devolucion
-        alta_bd.save()       
+        alta_bd.save() 
+         
+        self.inventario.agregar_pelicula(titulo)  #notifica al invetario (observador) que se agrego una pelicula
 
 
     def elimina_pelicula_de_bd(self, titulo):
@@ -116,9 +118,10 @@ class BaseDeDatos:
             None: Si no se encuentra la película en la base de datos.
         """
         try:
-            borrar_base = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower()) 
+            borrar_base = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower())
+            self.inventario.eliminar_pelicula(titulo) #notifica al invetario (observador) que se elimino una pelicula 
             borrar_base.delete_instance()
-
+            
         except Tabla.DoesNotExist:
             return None 
 
