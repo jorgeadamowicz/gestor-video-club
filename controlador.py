@@ -1,3 +1,4 @@
+
 """
 Módulo controlador para la aplicación de Video Club.
 
@@ -18,6 +19,7 @@ from vista import VistaVideoClub
 
 from modelo import BaseDeDatos
 
+from observador import Inventario, RegistroCsv
 
 
 class ControladorVideoClub:
@@ -163,8 +165,13 @@ if __name__ == "__main__":
     Este bloque inicializa el modelo, el controlador y la vista, y lanza la 
     interfaz gráfica principal de la aplicación.
     """
+    
+    inventario = Inventario() #instanciación de la clase Inventario
+    registro_csv = RegistroCsv() #instanciación de la clase RegistroCsv
+    inventario.registrar_observador(registro_csv) #relaciona el inventario (sujeto) con el registro_csv(observador)
+    
     ventana = Tk() #crea la ventana
-    modelo = BaseDeDatos()   # Instanciación del modelo. Se crea el objeto de la clase BaseDeDatos de manera que pueda acceder a los metodos de esta clase
+    modelo = BaseDeDatos(inventario)   # Instanciación del modelo. Se crea el objeto de la clase BaseDeDatos de manera que pueda acceder a los metodos de esta clase
     application = ControladorVideoClub(modelo)  # El controlador recibe el modelo
     vista = VistaVideoClub(ventana, application) # La vista recibe la ventana y el objeto application de la clase ControladorVideoClub
     ventana.mainloop()

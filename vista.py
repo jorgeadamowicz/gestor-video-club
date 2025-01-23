@@ -67,7 +67,6 @@ class VistaVideoClub:
         Crea y configura todos los widgets de la interfaz gráfica, incluyendo los LabelFrames, Labels, Entrys y Botones.
         """
         self.lf_datapicker = LabelFrame(self.ventana, text ="Fecha Devolución", padx = 10, pady = 10)
-        print("lf_datapicker creado")  # Verificar que esta línea se ejecuta (PRUEBA)
         self.lf_datapicker.grid(row=0, column=2, padx=20, pady=20)
 
         self.calendario = Calendar(self.lf_datapicker, date_pattern = "dd/mm/yyyy")
