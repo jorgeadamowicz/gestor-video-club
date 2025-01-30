@@ -1,5 +1,13 @@
 import socket
 import json
+from modelo import BaseDeDatos  # Importa la clase del modelo
+from controlador import ControladorVideoClub
+
+# Crear la instancia del modelo y luego del controlador
+inventario = "video_base_orm.db"  # acceso a la base de datos
+modelo = BaseDeDatos(inventario)  # Instancia del modelo y se pasa la ruta como argumento
+controlador = ControladorVideoClub(modelo) #  # Instancia del controlador que recibe el modelo como argumento
+
 
 #direccion y puerto donde escuchará el servidor
 host = '127.0.0.1'  # Dirección local
@@ -12,16 +20,22 @@ def procesa_request(request):
     try:
         request_data = json.loads(request)#convierte el json en diccionario de python
         action = request_data.get("action")
+        modo = request_data.get("modo", "local") #por defecto el modo debe ser 'local'
         
         if action == "get_movie":
+            titulo = request_data.get("querry")
             #aca irá logica que invoca al metodo que realiza la consulta a bd a travez del controlador.
             #ver como manejar los datos resultantes para pasarlos a json
-            movie_data = {
-                "title": "las rubias",
-                "genre": "risa",
-                "status": "disponible"
-            }
-            return {"status": "success", "data": movie_data}
+            resultado = controlador.gestiona_verifica_catalogo(
+                titulo = titulo,
+                genero = None,
+                estado = None,
+                socio = None,
+                numero = None,
+                devolucion = None,
+                modo = modo
+            )
+            return {"status": "success", "data": resultado} if resultado else {"status": "error", "message": "Película no encontrada en catálogo."}
         else:
             return {"status": "error", "message": "Accion Inválida."}
         
@@ -56,3 +70,5 @@ while True: #mantiene el servidor abierto
     finally:
         #cerrar la conexion
         client_socket.close()
+
+

@@ -108,7 +108,7 @@ class ControladorVideoClub:
         rows = self.modelo.consulta_base_datos() 
         return rows  
 
-    def gestiona_verifica_catalogo(self, titulo,  genero, estado, socio, numero, devolucion):
+    def gestiona_verifica_catalogo(self, titulo,  genero, estado, socio, numero, devolucion, modo= "local"):
         """
         Verifica si una película se encuentra en el catálogo.
 
@@ -126,8 +126,13 @@ class ControladorVideoClub:
         """
         resultado = self.modelo.verifica_catalogo_en_bd(titulo, genero, estado, socio, numero, devolucion)
         if resultado is None:
-            vista.mostrar_mensaje_no_encontrado(titulo)
+            if modo == "local":
+                print(f"trabajando en modo: {modo}")
+                vista.mostrar_mensaje_no_encontrado(titulo)
+            else:
+                return None # En modo remoto, retorna None para que el servidor gestione el mensaje
         else:
+            print(f"el resultado es {resultado}")
             return resultado 
 
     def gestiona_alquilar_pelicula(self, titulo, genero, estado, socio, numero, devolucion):
