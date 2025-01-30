@@ -265,7 +265,7 @@ class VistaVideoClub:
             CampoInvalidoError: Si ocurre un error en las validaciones necesarias para el alquiler.
         """
         if resultado:
-            estado_disponibilidad = resultado.estado
+            estado_disponibilidad = resultado.get("estado")#se cambió el manejo de resultado de objeto a diccionario
             if estado_disponibilidad == "Disponible":
                 try:
                     # Llamada a la función decorada y validaciones

@@ -148,12 +148,12 @@ class BaseDeDatos:
             devolucion (str): Fecha de devolución esperada.
 
         Returns:
-            Tabla: Objeto que representa la película si existe.
+            dict: Diccionario con los datos de la película si existe.
             None: Si no se encuentra la película.
         """
         try:
             verifica_base_resultado = Tabla.get(fn.LOWER(Tabla.titulo) == titulo.lower())
-            return verifica_base_resultado
+            return verifica_base_resultado.__data__
         
         except Tabla.DoesNotExist:
             return None
