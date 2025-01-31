@@ -119,6 +119,10 @@ class ControladorVideoClub:
             socio (str): Socio asociado a la película.
             numero (int): Número único asociado al alquiler.
             devolucion (str): Fecha de devolución esperada.
+            modo (str, opcional): Define si la consulta es local o remota. 
+                              - "local": Muestra el mensaje en la vista si la película no se encuentra.
+                              - "remoto": Retorna `None`, permitiendo que el servidor gestione la respuesta. 
+                              El valor por defecto es "local".
 
         Returns:
             dict or None: Datos de la película si se encuentra, `None` en caso contrario.

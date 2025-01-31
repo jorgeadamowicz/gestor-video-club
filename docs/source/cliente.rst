@@ -1,7 +1,7 @@
-Módulo estilos 
+Módulo cliente 
 ==============
 
-.. automodule:: estilos
+.. automodule:: cliente
    :members:
    :undoc-members:
    :show-inheritance:

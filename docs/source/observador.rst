@@ -1,4 +1,4 @@
-observador module
+Módulo observador 
 =================
 
 .. automodule:: observador

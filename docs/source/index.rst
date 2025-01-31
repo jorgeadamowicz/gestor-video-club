@@ -24,11 +24,13 @@ La aplicación fue construida utilizando una Interface Gráfica de la librería 
    :maxdepth: 2
    :caption: Contents:
 
+   cliente
    controlador
    estilos
    modelo
    observador
+   servidor
    validaciones
    vista
-
+   
    modules

@@ -1,4 +1,4 @@
-controlador module
+Módulo controlador 
 ==================
 
 .. automodule:: controlador

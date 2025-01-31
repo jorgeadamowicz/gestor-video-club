@@ -10,3 +10,5 @@ proyecto
    observador
    validaciones
    vista
+   cliente
+   servidor
