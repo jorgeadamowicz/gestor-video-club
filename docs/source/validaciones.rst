@@ -1,4 +1,4 @@
-validaciones module
+Módulo validaciones 
 ===================
 
 .. automodule:: validaciones

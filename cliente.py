@@ -1,10 +1,54 @@
+"""
+Módulo Cliente para la consulta remota del catálogo de películas.
+
+Este módulo implementa una interfaz gráfica con Tkinter que permite al usuario 
+realizar consultas sobre un catálogo de películas de forma remota a través de sockets.
+
+Clases:
+    - ClienteGui: Interfaz gráfica del cliente para la consulta de películas.
+
+Ejemplo de uso:
+    Ejecutar este script para abrir la ventana de consulta:
+        python cliente.py
+"""
+
 import tkinter as tk
 from tkinter import messagebox,  LabelFrame, Entry, Button
 import socket
 import json
 
 class ClienteGui:
+    """
+    Clase que representa la interfaz gráfica del cliente.
+
+    Permite al usuario ingresar el título de una película, enviar una consulta 
+    al servidor y visualizar los resultados devueltos.
+
+    Atributos:
+        root (tk.Tk): 
+            Ventana principal de la aplicación.
+        entry_titulo (tk.Entry): 
+            Campo de entrada para el título de la película.
+        resultado_texto (tk.Text): 
+            Widget de texto para mostrar los resultados de la consulta.
+        lf_busqueda (tk.LabelFrame):
+            Marco contenedor para la sección de búsqueda.
+        lf_resultados (tk.LabelFrame):
+            Marco contenedor para la visualización de resultados.
+        boton_busqueda (tk.Button):
+            Botón para ejecutar la búsqueda.
+        boton_limpiar (tk.Button): 
+            Botón para limpiar los campos de entrada y resultados.
+    """
+    
     def __init__(self, root):
+        """
+        Inicializa la interfaz gráfica del cliente.
+
+        Args:
+            root (tk.Tk): Instancia de la ventana principal.
+        """
+        
         self.root = root
         self.root.title("Cliente")
         self.root.geometry("500x400")
@@ -35,6 +79,24 @@ class ClienteGui:
         self.resultado_texto.grid(row = 0, column = 0, padx = 10, pady = 10)
 
     def consulta_pelicula(self):
+        """
+        Envía una consulta al servidor para verificar la existencia de una película en el catálogo.
+
+        La consulta se envía a través de un socket TCP en formato JSON.
+        Si el servidor responde con éxito, los resultados se muestran en la interfaz gráfica.
+
+        Maneja excepciones en caso de errores de conexión o fallos inesperados.
+
+        Excepciones:
+            ConnectionRefusedError: Si no se puede establecer conexión con el servidor.
+            Exception: Cualquier otro error inesperado.
+
+        Notas:
+            - El servidor debe estar en ejecución para que la consulta funcione.
+            - La respuesta se recibe en formato JSON y se muestra en la interfaz.
+
+        """
+        
         titulo = self.entry_titulo.get().strip()
         if not titulo:
             messagebox.showwarning("Advertencia", "Debe ingresar el nombre del titulo a consultar") 
@@ -50,7 +112,7 @@ class ClienteGui:
             #crea la consulta en formato json
             request = {
                 "action": "get_movie",
-                "querry": titulo,
+                "query": titulo,
                 "modo": "remoto" #indica que la solicitud proviene del cliente 'remoto'
             }
             #envia la consulta al servidor
@@ -84,6 +146,13 @@ class ClienteGui:
     
     #limpia los campos de entrada y la vista de resultados    
     def limpiar_campos(self):
+        """
+        Limpia los campos de entrada y la vista de resultados.
+
+        - Borra el texto ingresado en `entry_titulo`.
+        - Borra los resultados mostrados en `resultado_texto`.
+        """
+        
         self.entry_titulo.delete(0, tk.END)
         self.resultado_texto.config(state = tk.NORMAL)
         self.resultado_texto.delete(1.0, tk.END)

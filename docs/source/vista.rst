@@ -1,4 +1,4 @@
-vista module
+Módulo vista 
 ============
 
 .. automodule:: vista
